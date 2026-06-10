@@ -10,10 +10,13 @@ A WebXR experience built with Vite + Three.js:
 
 - **In a normal browser** it renders a rubber-duck glTF model on a dark ground
   plane. The duck slowly spins, and you can drag to orbit the camera.
-- **On an AR-capable device** (Quest 2/3/Pro, Android + ARCore, or the iOS
-  WebXR Viewer app) tapping the **AR** button enters an immersive session. A
-  white reticle tracks real surfaces via WebXR hit-testing; tapping places the
-  duck on the surface under the reticle. Tap again to move it.
+- **On a WebXR AR device** (Quest 2/3/Pro, Android + ARCore) tapping the **AR**
+  button enters an immersive session. A white reticle tracks real surfaces via
+  WebXR hit-testing; tapping places the duck on the surface under the reticle.
+  Tap again to move it.
+- **On iPhone/iPad**, where Safari has no WebXR, the page shows a **VIEW IN AR**
+  button that opens the duck in iOS **AR Quick Look** (the system AR viewer)
+  instead.
 
 ## What I changed from the starter
 
@@ -36,6 +39,12 @@ The starter rendered a rotating blue cube. For Lab 1 I:
 5. **AR session polish** — the duck is hidden when an AR session starts (a model
    floating at desktop eye height looks wrong in a real room) and only appears
    after the first placement. On session end the desktop/orbit view is restored.
+6. **iOS AR Quick Look fallback** — iOS Safari has no WebXR, so the greyed-out AR
+   button is useless there. Instead the app feature-detects `immersive-ar`
+   support: when it's missing but Safari advertises `rel="ar"` support, it shows
+   a **VIEW IN AR** button that hands a USDZ to iOS AR Quick Look. I exported the
+   same duck (at the same 0.2 m scale) to `public/models/Duck.usdz` with
+   Three.js's `USDZExporter` so the iOS path shows the identical model.
 
 ## How it works (technical notes)
 
@@ -46,9 +55,11 @@ The starter rendered a rotating blue cube. For Lab 1 I:
 - **Transparent canvas:** the `WebGLRenderer` uses `alpha: true` so the device
   camera feed shows through in AR. `renderer.xr.enabled = true` lets Three.js
   drive the WebXR session.
+- **Entry-point detection:** on load the app awaits
+  `navigator.xr.isSessionSupported('immersive-ar')`. If true it mounts the WebXR
+  `ARButton`; if false but the browser supports `<a rel="ar">` (iOS Safari) it
+  mounts the AR Quick Look button; otherwise (desktop) neither appears.
 - **Desktop fallback:** `OrbitControls` provides drag-to-orbit when not in XR.
-  The `AR` button greys out (shows "AR NOT SUPPORTED") on hardware without AR —
-  expected on a desktop browser.
 - **Single render loop:** `setAnimationLoop` receives an `XRFrame` only inside an
   XR session; outside XR the hit-test block is skipped and it just renders the
   spinning duck.
@@ -57,8 +68,9 @@ The starter rendered a rotating blue cube. For Lab 1 I:
 
 - `npm install && npm run dev -- --host` for local dev (HTTPS via
   `@vitejs/plugin-basic-ssl`, required by WebXR).
-- `npm run build` produces `dist/`. The `public/models/Duck.glb` asset is copied
-  into `dist/models/` automatically, so the model ships with the build.
+- `npm run build` produces `dist/`. The `public/models/Duck.glb` and
+  `Duck.usdz` assets are copied into `dist/models/` automatically, so both the
+  WebXR model and the iOS AR Quick Look model ship with the build.
 - Deployed to **GitHub Pages** via the included
   `.github/workflows/deploy.yml`, which runs `npm ci && npm run build` and
   publishes `dist/` on every push to `main`. `base: './'` in `vite.config.js`
@@ -84,7 +96,9 @@ The AR flow only runs on real hardware. To record `demo.mp4`:
 
 ## Known limitations
 
-- iOS Safari has no WebXR support; the WebXR Viewer app is required on iOS.
+- iOS Safari has no WebXR, so iOS uses AR Quick Look (the **VIEW IN AR** button)
+  rather than the in-browser hit-test / tap-to-place flow. Placement there is
+  handled by the iOS system AR viewer, not by this app's reticle.
 - The duck does not cast shadows and uses scene lighting rather than AR
   light-estimation, so it won't match room lighting precisely.
 - Each tap repositions the single duck; there is no multi-object placement.

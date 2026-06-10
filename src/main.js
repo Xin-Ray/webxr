@@ -26,15 +26,34 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.xr.enabled = true;
 document.body.appendChild(renderer.domElement);
 
-// The AR button enters the immersive session. 'hit-test' is required (no
-// hit-test, no tap-to-place); the optional features degrade gracefully if the
-// device lacks them. The button greys out on hardware with no AR support.
-document.body.appendChild(
-  ARButton.createButton(renderer, {
-    requiredFeatures: ['hit-test'],
-    optionalFeatures: ['anchors', 'plane-detection', 'light-estimation'],
-  }),
-);
+// Picking the AR entry point. WebXR (Android Chrome, headsets) gets the real
+// immersive session via ARButton. iOS Safari has no WebXR, but Safari can hand
+// a USDZ model to the system AR viewer ("AR Quick Look"), so we offer that
+// instead. Anything else (desktop) just gets the orbit fallback below.
+async function setupAREntry() {
+  const xrSupported =
+    navigator.xr && (await navigator.xr.isSessionSupported('immersive-ar'));
+
+  if (xrSupported) {
+    // 'hit-test' is required (no hit-test, no tap-to-place); the optional
+    // features degrade gracefully if the device lacks them.
+    document.body.appendChild(
+      ARButton.createButton(renderer, {
+        requiredFeatures: ['hit-test'],
+        optionalFeatures: ['anchors', 'plane-detection', 'light-estimation'],
+      }),
+    );
+    return;
+  }
+
+  // relList.supports('ar') is true on iOS/iPadOS Safari — the AR Quick Look
+  // path. If even that is missing we leave AR off and rely on orbit controls.
+  const quickLookSupported = document
+    .createElement('a')
+    .relList.supports?.('ar');
+  if (quickLookSupported) addQuickLookButton();
+}
+setupAREntry();
 
 // Lighting. MeshStandardMaterial is unlit without a light in the scene.
 scene.add(new THREE.HemisphereLight(0xffffff, 0x444444, 1));
@@ -90,6 +109,45 @@ new GLTFLoader().load(
   undefined,
   (err) => console.error('Failed to load Duck.glb', err),
 );
+
+// --- iOS AR Quick Look fallback -------------------------------------------
+// Safari can't run WebXR, but it can open a USDZ in the system AR viewer from
+// an <a rel="ar"> link. We ship a pre-built Duck.usdz (a USDZExporter copy of
+// the same model, kept at its 0.2 m scale) so it appears tabletop-sized and
+// Quick Look gets a real .usdz URL to load.
+const DUCK_USDZ_URL = new URL('models/Duck.usdz', location.href).href;
+
+function addQuickLookButton() {
+  const button = document.createElement('button');
+  button.textContent = 'VIEW IN AR';
+  // Mirror three.js's ARButton styling so the page looks the same on iOS.
+  button.style.cssText = [
+    'position:absolute',
+    'bottom:20px',
+    'left:50%',
+    'transform:translateX(-50%)',
+    'padding:12px 18px',
+    'border:1px solid #fff',
+    'border-radius:4px',
+    'background:rgba(0,0,0,0.1)',
+    'color:#fff',
+    'font:13px sans-serif',
+    'opacity:0.5',
+    'outline:none',
+    'z-index:999',
+    'cursor:pointer',
+  ].join(';');
+  document.body.appendChild(button);
+
+  button.addEventListener('click', () => {
+    // Quick Look only triggers from an <a rel="ar"> that contains an <img>.
+    const link = document.createElement('a');
+    link.rel = 'ar';
+    link.href = DUCK_USDZ_URL;
+    link.appendChild(document.createElement('img'));
+    link.click();
+  });
+}
 
 // The reticle marks where a tap would place the object. We drive its transform
 // straight from the hit-test pose matrix, so matrixAutoUpdate is off to stop

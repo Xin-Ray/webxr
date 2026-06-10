@@ -10,7 +10,7 @@ A minimal but complete WebXR app. Renders a rubber-duck glTF model + ground in a
 
 - **Node 20+** and npm 10+. Check with `node --version`. The `package.json` enforces this via `engines`.
 - A modern browser (Chrome 110+, Edge 110+, or the Quest browser).
-- For real AR: a Quest 2/3/Pro, an Android phone with ARCore, or the WebXR Viewer app on iOS.
+- For real AR: a Quest 2/3/Pro or an Android phone with ARCore (WebXR), or an iPhone/iPad (iOS opens the model in AR Quick Look — see below).
 
 ## Run locally
 
@@ -67,8 +67,8 @@ Open the printed `https://….ngrok.app` URL on the phone. Trusted cert, no warn
 |------------------------------|---------------------------------------------------------------------------------------------------------------------|
 | Meta Quest 2/3/Pro           | Open the LAN URL in the built-in browser; tap **AR** at the bottom.                                                 |
 | Android (Chrome 110+)        | Open in Chrome; tap **AR**. Will use ARCore.                                                                        |
-| iPhone / iPad                | Safari does not support WebXR. Use the **WebXR Viewer** app from the App Store |
-| Desktop                      | Drag to orbit; the AR button will be greyed out — that's expected.                                                  |
+| iPhone / iPad                | Safari has no WebXR, so the page shows a **VIEW IN AR** button instead. Tap it to open the duck in iOS **AR Quick Look** (loads `models/Duck.usdz`). The deprecated WebXR Viewer app is *not* needed. |
+| Desktop                      | Drag to orbit; no AR button appears — that's expected.                                                  |
 
 ## Deploy to GitHub Pages
 
@@ -86,7 +86,8 @@ The `base: './'` in `vite.config.js` produces relative asset URLs, so the site w
 
 ## What's in here
 
-- `src/main.js` — Three.js scene, AR session button, hit-test reticle, tap-to-place, non-XR orbit fallback.
+- `src/main.js` — Three.js scene, WebXR AR button + hit-test reticle + tap-to-place, an iOS AR Quick Look fallback button, and a non-XR orbit fallback.
+- `public/models/Duck.glb` — the WebXR model; `public/models/Duck.usdz` — the same duck as USDZ for iOS AR Quick Look.
 - `vite.config.js` — HTTPS dev server (required by WebXR).
 - `index.html`, `src/style.css` — minimal HTML shell.
 
