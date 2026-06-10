@@ -15,7 +15,9 @@ Tap-to-place AR running on iPhone (in the XR Viewer app, which provides WebXR + 
   <img src="pictures/IMG_8629.JPG" width="32%" alt="Rubber duck placed on a desk in AR, closer view" />
 </p>
 
-Screen recordings: [clip 1](pictures/ScreenRecording_06-10-2026%2015-48-40_1.MP4) · [clip 2](pictures/ScreenRecording_06-10-2026%2016-46-16_1.MP4).
+### Demo video
+
+A full screen recording of the tap-to-place flow on iPhone — scanning a surface, the reticle locking on, and tapping to drop and re-place the duck — is in [`pictures/ScreenRecording_06-10-2026 16-46-16_1.MP4`](pictures/ScreenRecording_06-10-2026%2016-46-16_1.MP4) (GitHub serves it as a download). An earlier clip is in [`pictures/ScreenRecording_06-10-2026 15-48-40_1.MP4`](pictures/ScreenRecording_06-10-2026%2015-48-40_1.MP4).
 
 ## Requirements
 
