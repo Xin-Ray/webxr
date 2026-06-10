@@ -6,6 +6,17 @@ A minimal but complete WebXR app. Renders a rubber-duck glTF model + ground in a
 
 **Live URL:** https://xin-ray.github.io/webxr/ — see [`WRITEUP.md`](WRITEUP.md) for what was done.
 
+## Demo
+
+Tap-to-place AR running on iPhone (in the XR Viewer app, which provides WebXR + hit-test) — the rubber duck dropped onto a real desk:
+
+<p align="center">
+  <img src="pictures/IMG_8628.JPG" width="32%" alt="Rubber duck placed on a desk in AR" />
+  <img src="pictures/IMG_8629.JPG" width="32%" alt="Rubber duck placed on a desk in AR, closer view" />
+</p>
+
+Screen recordings: [clip 1](pictures/ScreenRecording_06-10-2026%2015-48-40_1.MP4) · [clip 2](pictures/ScreenRecording_06-10-2026%2016-46-16_1.MP4).
+
 ## Requirements
 
 - **Node 20+** and npm 10+. Check with `node --version`. The `package.json` enforces this via `engines`.
